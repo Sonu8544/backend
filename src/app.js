@@ -1,8 +1,12 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const connectDB = require("./config/database.js");
 
 const app = express();
+
+
 const UserModel = require("./models/users.js");
 const bcrypt = require("bcrypt");
 
@@ -11,6 +15,7 @@ const { userValidation } = require("./utils/userValidation.js");
 
 // Middle ware for parsing application/json
 app.use(express.json());
+app.use(cookieParser());
 
 // Create post api
 app.post("/signup", async (req, res, next) => {
@@ -20,15 +25,13 @@ app.post("/signup", async (req, res, next) => {
 
         // encrypt password before saving to DB
         const { password } = req.body;
-        const saltRounds = 10; // Number of salt rounds for hashing
-        const passwerdHash = await bcrypt.hash(password, saltRounds); // Hash the password
-        console.log("Hashed Password: ", passwerdHash);
+        const saltRounds = 10; 
+        const passwerdHash = await bcrypt.hash(password, saltRounds);
 
         const user = new UserModel({
             ...req.body,
             password: passwerdHash,
         });
-        console.log(user);
 
         await user.save();
         console.log("post Api called...");
@@ -48,17 +51,21 @@ app.post("/login", async (req, res) => {
         const { emailId, password } = req.body;
         const user = await UserModel.findOne({ emailId: emailId });
         if (!user) {
-            // return res.status(404).send("User not found.");
             throw new Error("Invalid cradentials!!!");
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password)
         if (isPasswordValid) {
+
+            const token = await jwt.sign({ _id: user._id }, "devTinder@123");
+            console.log("Token: ", token);
+
+            res.cookie("token", token)
             res.send("Login Successfully!");
+
             console.log("Login Successfully!");
         }
         else {
-            // return res.status(401).send("Invalid password.");
             throw new Error("Invalid cradentials!!!");
         }
 
@@ -67,6 +74,33 @@ app.post("/login", async (req, res) => {
             .status(400)
             .send("Something went wrong while creating user: " + error.message);
         console.log("Error: ", error.message);
+    }
+})
+
+app.get("/profile", async (req, res) => {
+
+    try {
+        const cookies = req.cookies;
+        const { token } = cookies;
+        if(!token){
+            throw new Error("Token not found in cookies.");
+        }
+        const decodedToken = jwt.verify(token, "devTinder@123")
+
+        const { _id } = decodedToken;
+        console.log("Login User ID is: " + _id);
+
+        // console.log(cookies);
+        // res.send(cookies + "Cookie is set successfully!");
+
+        const user = await UserModel.findById(_id);
+        if (!user) {
+            throw new Error("User not found.");
+        } else {
+            res.send(user);
+        }
+    } catch (error) {
+        res.status(500).send("ERROR: " + error.message);
     }
 })
 
