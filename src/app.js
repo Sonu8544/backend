@@ -40,7 +40,36 @@ app.post("/signup", async (req, res, next) => {
         console.log("Error: ", error.message);
     }
 });
- 
+
+
+// Login API
+app.post("/login", async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
+        const user = await UserModel.findOne({ emailId: emailId });
+        if (!user) {
+            // return res.status(404).send("User not found.");
+            throw new Error("Invalid cradentials!!!");
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password)
+        if (isPasswordValid) {
+            res.send("Login Successfully!");
+            console.log("Login Successfully!");
+        }
+        else {
+            // return res.status(401).send("Invalid password.");
+            throw new Error("Invalid cradentials!!!");
+        }
+
+    } catch (error) {
+        res
+            .status(400)
+            .send("Something went wrong while creating user: " + error.message);
+        console.log("Error: ", error.message);
+    }
+})
+
 // Get User Data from DB
 app.get("/user", async (req, res) => {
     const userEmail = req.body.emailId;
