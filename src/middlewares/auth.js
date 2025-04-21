@@ -1,29 +1,29 @@
-// Admin Auth
-const adminAuth = (req, res, next) => {
-    const token = "xyz";
-    const isAdminAuthrised = token === "xyz"
+const jwt = require("jsonwebtoken");
+const UserModel = require("../models/users");
 
-    if (!isAdminAuthrised) {
-        console.log("unothrised Admin...")
-        res.status(401).send("Unothrised Admin!")
-    } else {
-        next();
-    }
-}
+// User Auth
+const userAuth = async (req, res, next) => {
+    try {
+        const { token } = req.cookies;
+        if (!token) {
+            throw new Error("Unauthorized: Token Not Valid!!!!.");
+        }
+        const decodedToken = await jwt.verify(token, "devTinder@123");
 
-// Usaer Auth
-const userAuth = (req, res, next) => {
-    const userToken = "abc";
-    const isUserAuthrised = userToken === "abc"
-    if (!isUserAuthrised) {
-        console.log("Unothrised user!")
-        res.status(401).send("Unothrised user!")
-    } else {
+        const { _id } = decodedToken;
+        const user = await UserModel.findById(_id);
+        if (!user) {
+            throw new Error("User not found in database.");
+        }
+
+        req.user = user;
         next();
+
+    } catch (error) {
+        res.status(500).send("Error in user auth: " + error.message);
     }
 }
 
 module.exports = {
-    adminAuth,
-    userAuth
+    userAuth,
 }

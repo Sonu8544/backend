@@ -1,19 +1,13 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-
 const connectDB = require("./config/database.js");
-
 const app = express();
 
-
 const UserModel = require("./models/users.js");
-const bcrypt = require("bcrypt");
-
-// User validator function
 const { userValidation } = require("./utils/userValidation.js");
-
-// Middle ware for parsing application/json
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("../src/middlewares/auth");
 app.use(express.json());
 app.use(cookieParser());
 
@@ -54,13 +48,14 @@ app.post("/login", async (req, res) => {
             throw new Error("Invalid cradentials!!!");
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password)
+        const isPasswordValid = await user.validatePassword(password);
         if (isPasswordValid) {
 
-            const token = await jwt.sign({ _id: user._id }, "devTinder@123");
+            const token = await user.getJWT();
+            console.log("Token generated successfully...");
             console.log("Token: ", token);
 
-            res.cookie("token", token)
+            res.cookie("token", token, { expires: new Date(Date.now() + 8 + 900000), httpOnly: true });
             res.send("Login Successfully!");
 
             console.log("Login Successfully!");
@@ -77,30 +72,25 @@ app.post("/login", async (req, res) => {
     }
 })
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
 
     try {
-        const cookies = req.cookies;
-        const { token } = cookies;
-        if(!token){
-            throw new Error("Token not found in cookies.");
-        }
-        const decodedToken = jwt.verify(token, "devTinder@123")
+        const user = req.user;
+        res.send(user);
 
-        const { _id } = decodedToken;
-        console.log("Login User ID is: " + _id);
-
-        // console.log(cookies);
-        // res.send(cookies + "Cookie is set successfully!");
-
-        const user = await UserModel.findById(_id);
-        if (!user) {
-            throw new Error("User not found.");
-        } else {
-            res.send(user);
-        }
     } catch (error) {
-        res.status(500).send("ERROR: " + error.message);
+        res.status(400).send("ERROR: " + error.message);
+    }
+})
+
+// Connection request api
+app.post("/request", userAuth, async (req, res, next) => {
+    try {
+        const user = req.user;
+        console.log("Request API called...");
+        res.send(user.firstName + "sent connection request!");
+    } catch (error) {
+
     }
 })
 
