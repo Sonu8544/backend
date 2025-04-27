@@ -16,7 +16,4 @@ const userValidation = (req) => {
 
 }
 
-module.exports = {
-    userValidation,
-    // userValidationUpdate,
-}
+module.exports = userValidation;
