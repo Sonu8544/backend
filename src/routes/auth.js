@@ -1,5 +1,6 @@
 const express = require('express');
-const userValidation = require("../utils/userValidation")
+// const userValidation = require("../utils/userValidation")
+const userValidation = require("../utils/userValidation").userValidation;
 const UserModel = require("../models/users.js");
 const bcrypt = require("bcrypt");
 
@@ -29,7 +30,6 @@ authRouter.post("/signup", async (req, res, next) => {
     }
 });
 
-// Login API
 authRouter.post("/login", async (req, res) => {
     try {
         const { emailId, password } = req.body;
@@ -58,6 +58,16 @@ authRouter.post("/login", async (req, res) => {
         res
             .status(400)
             .send("Something went wrong while creating user: " + error.message);
+        console.log("Error: ", error.message);
+    }
+})
+
+authRouter.post("/logout", async (req, res) => {
+    try {
+        res.cookie("token", null, { expires: new Date(Date.now()) });
+        res.send("Logout Successfully!");
+    } catch (error) {
+        res.status(400).send("Something went wrong while Logout: " + error.message);
         console.log("Error: ", error.message);
     }
 })
