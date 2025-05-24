@@ -56,4 +56,42 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res,
     }
 });
 
+// create api for accept and reject connection request
+requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, res, next) => {
+    try {
+        const loggedinUser = req.user;
+        const { status, requestId } = req.params;
+        const allowedStatus = ["accepted", "rejected"];
+
+        // validate the status
+        if (!allowedStatus.includes(status)) {
+            return res.status(400).json("Invalid status type: " + status);
+        }
+
+        const connectionRequest = await ConnecctionRequestModel.findOne({
+            _id: requestId,
+            toUserId: loggedinUser._id, 
+            status: "interested",
+        })
+
+        if (!connectionRequest) {
+            return res.status(404).json({ message: "Connection request not found..." });
+        }
+
+        // Update the status of the connection request
+        connectionRequest.status = status;
+        const data = await connectionRequest.save();
+       res.json({
+            success: true,
+            message: loggedinUser.firstName + " " + status + " the connection request",
+            data: data,
+        });
+        
+    } catch (error) {
+        res.status(400).send("ERROR: " + error.message);
+
+    }
+
+})
+
 module.exports = requestRouter;
