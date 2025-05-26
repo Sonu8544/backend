@@ -6,14 +6,16 @@ const userAuth = async (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            throw new Error("Unauthorized: Token Not Valid!!!!.");
+            // throw new Error("Unauthorized: Token Not Valid!!!!.");
+            return res.status(401).send("Please login to continue!");
         }
         const decodedToken = await jwt.verify(token, "devTinder@123");
 
         const { _id } = decodedToken;
         const user = await UserModel.findById(_id);
         if (!user) {
-            throw new Error("User not found in database.");
+            // throw new Error("User not found in database.");
+            return res.status(401).send("Please login to continue!");
         }
 
         req.user = user;
