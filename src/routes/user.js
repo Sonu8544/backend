@@ -107,9 +107,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
                 { _id: { $ne: loggedinUser._id } }
             ],
         }).select(USER_SAFE_DATA).skip(skip).limit(limit)
-
-        console.log(users);
-
+        
         res.json({
             status: true,
             message: "User fetch his feed card",

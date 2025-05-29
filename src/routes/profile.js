@@ -46,7 +46,6 @@ profileRouter.patch("/profile/edit/password", userAuth, async (req, res) => {
         }
 
         const { oldPassword, newPassword } = req.body;
-        console.log("Loggedin user: ", newPassword);
 
         const isMatch = await bcrypt.compare(oldPassword, loggedInUser.password);
         if (!isMatch) {

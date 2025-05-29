@@ -42,8 +42,7 @@ authRouter.post("/login", async (req, res) => {
         if (isPasswordValid) {
 
             const token = await user.getJWT();
-            console.log("Token generated successfully...");
-            console.log("Token: ", token);
+            // console.log("Token: ", token);
 
             res.cookie("token", token, { expires: new Date(Date.now() + 8 + 900000), httpOnly: true });
             res.send(user);
