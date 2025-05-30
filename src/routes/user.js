@@ -69,6 +69,44 @@ userRouter.get("/user/requests/accepted", userAuth, async (req, res) => {
     }
 })
 
+// get all accepted requests new connection API
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+    try {
+        const loggedinUser = req.user;
+        const ConnectionRequest = await ConnecctionRequestModel.find({
+            $or: [
+                { fromUserId: loggedinUser._id, status: "accepted" },
+                { toUserId: loggedinUser._id, status: "accepted" }
+            ]
+        }).populate("fromUserId", USER_SAFE_DATA)
+            .populate("toUserId", USER_SAFE_DATA)
+
+        const data = ConnectionRequest.map((data) => (
+            data.fromUserId._id.equals(loggedinUser._id) ? data.toUserId : data.fromUserId
+        ))
+
+        // const data = ConnectionRequest.map((data) => {
+        //     if (data.fromUserId._id.equals(loggedinUser._id)) {
+        //         return data.toUserId;
+        //     } else {
+        //         return data.fromUserId;
+        //     }
+        // })
+        if (!ConnectionRequest) {
+            return res.status(404).send("No connection requests found");
+        }
+        res.json({
+            status: true,
+            message: "Connection requests fetched successfully",
+            data: data
+        })
+
+    } catch (error) {
+        res.status(400).send("ERROR: " + error.message);
+
+    }
+})
+
 
 // get user feed cards
 
