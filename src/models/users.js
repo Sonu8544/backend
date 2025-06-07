@@ -68,15 +68,16 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: ["JavaScript", "React", "Node.Js"],
     },
-    photoUrl: {
-        type: String,
-        default: "https://www.cgg.gov.in/wp-content/uploads/2017/10/dummy-profile-pic-male1.jpg",
-        validate(value) {
-            if (!validator.isURL(value)) {
-                throw new Error("Invalid URL" + value)
-            }
-        }
-    },
+    // photoUrl: {
+    //     type: String,
+    //     default: "https://www.cgg.gov.in/wp-content/uploads/2017/10/dummy-profile-pic-male1.jpg",
+    //     validate(value) {
+    //         if (!validator.isURL(value)) {
+    //             throw new Error("Invalid URL" + value)
+    //         }
+    //     }
+    // },
+    photo: { type: String }
 }, {
     timestamps: true,
 })

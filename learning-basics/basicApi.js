@@ -60,7 +60,7 @@ app.patch("/user/:userId", async (req, res) => {
             "skills",
             "password",
             "age",
-            "photoUrl",
+            "photo",
             "phoneNumber",
             "about",
         ];
