@@ -16,7 +16,7 @@ app.get("/user", (req, res) => {
     res.send({ firstName: "Sonuu singh...", lastName: "Kumar" })
 })
 
-// How to get dynamic route like /user/123   http://localhost:5555/user/123
+// How to get dynamic route like /user/123   http://localhost:7777/user/123
 app.get("/user/:userId", (req, res) => {
     console.log(req.params);
     res.send({ name: "Ashok singh", home: "Begusarai" })
@@ -69,11 +69,11 @@ app.get(/a/, (req, res) => {
     res.send({ firstName: "Rejex", lastName: "Singh" })
 })
 
-// if fly match on url this shoulfd work  http://localhost:5555/dheiufhefly  
+// if fly match on url this shoulfd work  http://localhost:7777/dheiufhefly  
 app.get(/.*fly$/, (req, res) => {
     res.send({ firstName: "complax rejax", lastName: "Singh" })
 })
 
-app.listen(5555, () => {
-    console.log("server is successfully listen on port 5555...")
+app.listen(7777, () => {
+    console.log("server is successfully listen on port 7777...")
 });
