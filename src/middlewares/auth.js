@@ -9,7 +9,7 @@ const userAuth = async (req, res, next) => {
             // throw new Error("Unauthorized: Token Not Valid!!!!.");
             return res.status(401).send("Please login to continue!");
         }
-        const decodedToken = await jwt.verify(token, "devTinder@123");
+        const decodedToken = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
         const { _id } = decodedToken;
         const user = await UserModel.findById(_id);

@@ -5,6 +5,9 @@ const UserModel = require('../models/users');
 
 const requestRouter = express.Router();
 
+// get email function
+const sendEmail = require("../utils/sendEmail");
+
 // Connection request api
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res, next) => {
     try {
@@ -41,6 +44,17 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res,
         })
 
         const connectionRequestData = await connectionRequest.save();
+
+        // Send email notification
+        const emailResponse = await sendEmail.run(
+           `Hello ${toUser.firstName} you got new Request from ${req.user.firstName}`,
+           `<h1>Hello ${toUser.firstName},</h1>
+            <p>${req.user.firstName} has sent you a connection request with the status: ${status}.</p>
+            <p>Please log in to your account to review the request.</p>`,
+        );
+        console.log("Email sent successfully:", emailResponse);
+
+
         if (!connectionRequestData) {
             return res.status(400).send("Connection request failed...");
         } else {
@@ -70,7 +84,7 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
 
         const connectionRequest = await ConnecctionRequestModel.findOne({
             _id: requestId,
-            toUserId: loggedinUser._id, 
+            toUserId: loggedinUser._id,
             status: "interested",
         })
 
@@ -81,12 +95,12 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
         // Update the status of the connection request
         connectionRequest.status = status;
         const data = await connectionRequest.save();
-       res.json({
+        res.json({
             success: true,
             message: loggedinUser.firstName + " " + status + " the connection request",
             data: data,
         });
-        
+
     } catch (error) {
         res.status(400).send("ERROR: " + error.message);
 
