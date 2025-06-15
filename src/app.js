@@ -6,7 +6,8 @@ const cors = require('cors');
 require('dotenv').config();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    // origin: "http://localhost:5173",
+    origin: "http://54.92.193.254/",
     credentials: true,
 }));
 app.use(express.json());
